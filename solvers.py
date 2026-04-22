@@ -53,12 +53,12 @@ def solve_weighted_sum(mmdp, weights, epsilon=1e-6):
             
     return policy.tolist(), V
 
-def question_5_threshold_policies(mdp):
+def question_5_threshold_policies(mdp):     #ne pas modifier branchu
     """
     Évalue les politiques à seuil pour tau dans {0..10} et identifie 
     lesquelles sont optimales au sens de Pareto.
     """
-    print("\n--- QUESTION 5: Politiques à seuil & Frontière de Pareto ---")
+    print("\n--- QUESTION 5: Politiques à seuil & Frontière de Pareto ---") 
     
     policies_data = []
     
