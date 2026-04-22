@@ -1,49 +1,18 @@
-import numpy as np
-from MMDP import MMDP 
+from MMDP import MMDP
 from forest import generate_forest_instance
+from solvers import solve_weighted_sum
 
-def main():
-    print("=== DÉBUT DES TESTS - Q1 & Q2 ===")
+# (Générer la forêt et créer l'objet MMDP comme d'habitude)
+states, actions, T, R, gamma = generate_forest_instance()
+forest_model = MMDP(states, actions, T, R, gamma)
+forest_model.normalize_rewards()
 
-    # ---------------------------------------------------------
-    # 1. Génération des matrices de la Forêt (Question 2)
-    # ---------------------------------------------------------
-    states, actions, T, R, gamma = generate_forest_instance()
-    print("[OK] Données de la plantation générées (Taille S={}, A={}).".format(len(states), len(actions)))
+# Testons un forestier capitaliste (100% Profit, 0% Carbone, 0% Bio)
+poids_capitalistes = [1.0, 0.0, 0.0]
+policy_cap, V_cap = solve_weighted_sum(forest_model, poids_capitalistes)
+print("Politique Capitaliste :", policy_cap)
 
-    # ---------------------------------------------------------
-    # 2. Création de l'objet MMDP (Question 1)
-    # ---------------------------------------------------------
-    # On fait une copie brute de R juste pour l'affichage dans ce test
-    R_raw = np.copy(R) 
-    
-    forest_model = MMDP(states, actions, T, R, gamma)
-    print("[OK] Objet MMDP instancié.")
-
-    # ---------------------------------------------------------
-    # 3. Normalisation (Question 1)
-    # ---------------------------------------------------------
-    # Comme ta fonction ne se lance pas toute seule, on l'appelle ici :
-    forest_model.normalize_rewards()
-    print("[OK] Récompenses normalisées entre [0, 1].")
-
-    # ---------------------------------------------------------
-    # 4. Vérification des Résultats (Le Test)
-    # ---------------------------------------------------------
-    print("\n=== TEST DE COHÉRENCE SUR L'ÂGE 5 ===")
-    s_test = 4 # L'âge 5 correspond à l'indice 4 en Python
-    a_harvest = 1 # Action Récolter
-    a_wait = 0    # Action Attendre
-
-    print("\n> ACTION : RÉCOLTER (Harvest)")
-    print(f"Valeurs brutes       : Profit = {R_raw[s_test, a_harvest, 0]:.1f}€ | Carbone = {R_raw[s_test, a_harvest, 1]:.2f} | Bio = {R_raw[s_test, a_harvest, 2]:.2f}")
-    
-    norm_h = forest_model.get_reward_vector(s_test, a_harvest)
-    print(f"Valeurs normalisées  : Profit = {norm_h[0]:.4f} | Carbone = {norm_h[1]:.4f} | Bio = {norm_h[2]:.4f}")
-
-    print("\n> ACTION : ATTENDRE (Wait)")
-    norm_w = forest_model.get_reward_vector(s_test, a_wait)
-    print(f"Valeurs normalisées  : Profit = {norm_w[0]:.4f} | Carbone = {norm_w[1]:.4f} | Bio = {norm_w[2]:.4f}")
-
-if __name__ == "__main__":
-    main()
+# Testons un forestier écolo (0% Profit, 50% Carbone, 50% Bio)
+poids_ecolos = [0.0, 0.5, 0.5]
+policy_eco, V_eco = solve_weighted_sum(forest_model, poids_ecolos)
+print("Politique Écologiste :", policy_eco)
