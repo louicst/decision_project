@@ -4,7 +4,8 @@ from solvers import (
     solve_weighted_sum, 
     question_5_threshold_policies, 
     question_6_lorenz_efficient_policies,
-    questions_8_to_10_diverse_lorenz_policies
+    questions_8_to_10_diverse_lorenz_policies,
+    tester_question_12
 )
 from plots import plot_pareto_frontier_2d
 
@@ -36,9 +37,14 @@ def main():
     # Scanne 66 combinaisons de poids et filtre les meilleures
     q8_10_data = questions_8_to_10_diverse_lorenz_policies(forest_model, step=0.1)
 
+    print ("question 12 :")
+    tester_question_12(forest_model)
+    
     # --- ÉTAPE 7 : Visualisation (Question 11) ---
     # Génère et sauvegarde le graphique 2D
     plot_pareto_frontier_2d(q5_data, q8_10_data)
+
+    
 
     print("\n====================================================")
     print("             FIN TOTALE DES TESTS")

@@ -244,3 +244,79 @@ def questions_8_to_10_diverse_lorenz_policies(mdp, step=0.1):
         print(f"{pol_str:<35} | {p['v_raw'][0]:<10.2f} | {p['v_raw'][1]:<8.2f} | {p['v_raw'][2]:<8.2f} | {eff_str}")
         
     return unique_policies
+
+
+# --- QUESTION 12 : Stratégie Max-Min (Égalitariste) ---
+
+def calculer_politique_max_min(modele, poids, marge_erreur=1e-6):
+    """
+    Trouve la meilleure politique en utilisant la méthode Max-Min.
+    Au lieu d'additionner, on regarde le pire critère et on essaie de l'améliorer.
+    """
+    poids = np.array(poids)
+    
+    # On calcule les récompenses du pire scénario pour chaque état et action
+    recompenses_pire_cas = np.min(modele.R * poids, axis=2)
+    
+    valeurs = np.zeros(modele.num_states)
+    politique = np.zeros(modele.num_states, dtype=int)
+    
+    while True:
+        anciennes_valeurs = np.copy(valeurs)
+        ecart_max = 0
+        
+        for etat in range(modele.num_states):
+            scores_actions = np.zeros(modele.num_actions)
+            
+            for action in range(modele.num_actions):
+                gain_futur = np.sum(modele.T[etat, action, :] * anciennes_valeurs)
+                scores_actions[action] = recompenses_pire_cas[etat, action] + (modele.gamma * gain_futur)
+                
+            valeurs[etat] = np.max(scores_actions)
+            politique[etat] = np.argmax(scores_actions)
+            
+            ecart_max = max(ecart_max, abs(valeurs[etat] - anciennes_valeurs[etat]))
+            
+        if ecart_max < marge_erreur:
+            break
+            
+    return politique.tolist(), valeurs
+
+def tester_question_12(modele):
+    """
+    Teste notre nouvelle méthode Max-Min avec plusieurs profils.
+    """
+    print("\n--- QUESTION 12: Stratégie Alternative (Max-Min) ---")
+    
+    # 3 tests avec des priorités différentes
+    tests_poids = [
+        [0.33, 0.33, 0.34], # 1. Équilibre parfait
+        [0.50, 0.25, 0.25], # 2. Priorité Profit
+        [0.10, 0.45, 0.45]  # 3. Priorité Écologie
+    ]
+    
+    resultats = []
+    
+    for profil_poids in tests_poids:
+        # On calcule la politique avec notre nouvel algo
+        ma_politique, _ = calculer_politique_max_min(modele, profil_poids)
+        
+        # On récupère les vraies valeurs en Euros et Tonnes
+        vrais_scores = modele.evaluate_policy(ma_politique, use_normalized=False)[0]
+        
+        resultats.append({
+            'poids': profil_poids,
+            'politique': ma_politique,
+            'profit': vrais_scores[0],
+            'carbone': vrais_scores[1],
+            'bio': vrais_scores[2]
+        })
+        
+    # Affichage du tableau final
+    print(f"{'Poids (Prof, Carb, Bio)':<25} | {'Politique trouvée':<35} | {'Profit':<8} | {'Carbone':<8} | {'Bio':<8}")
+    print("-" * 95)
+    
+    for res in resultats:
+        texte_poids = str(res['poids'])
+        texte_politique = str(res['politique'])
+        print(f"{texte_poids:<25} | {texte_politique:<35} | {res['profit']:<8.2f} | {res['carbone']:<8.2f} | {res['bio']:<8.2f}")
