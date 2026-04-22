@@ -1,6 +1,6 @@
 from MMDP import MMDP
 from forest import generate_forest_instance
-from solvers import solve_weighted_sum, question_5_threshold_policies, question_6_lorenz_efficient_policies
+from solvers import solve_weighted_sum, question_5_threshold_policies, question_6_lorenz_efficient_policies, questions_8_to_10_diverse_lorenz_policies
 
 def main():
     print("====================================================")
@@ -48,8 +48,10 @@ def main():
     # Cette fonction va afficher le tableau Lorenz
     q6_data = question_6_lorenz_efficient_policies(forest_model, q5_data)
 
+    q8_10_data = questions_8_to_10_diverse_lorenz_policies(forest_model, step=0.1)
+
     print("\n====================================================")
-    print("             FIN DES TESTS Q1 À Q6")
+    print("             FIN DES TESTS Q1 À Q10")
     print("====================================================")
 
 if __name__ == "__main__":

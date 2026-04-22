@@ -165,3 +165,82 @@ def question_6_lorenz_efficient_policies(mdp, policies_data_from_q5):
         print(f"{p['tau']:<5} | {v_str:<30} | {l_str:<30} | {eff_str}")
         
     return lorenz_data
+
+def generate_weight_vectors(step=0.1):
+    """
+    Question 7: Generates a diverse set of weight vectors (w1, w2, w3) 
+    that sum to 1.0, using a specified step size.
+    """
+    weights = []
+    # Use integers to avoid Python floating-point precision issues
+    num_steps = int(np.round(1.0 / step))
+    
+    for w1 in range(num_steps + 1):
+        for w2 in range(num_steps + 1 - w1):
+            w3 = num_steps - w1 - w2
+            weights.append([w1 * step, w2 * step, w3 * step])
+            
+    return weights
+
+def questions_8_to_10_diverse_lorenz_policies(mdp, step=0.1):
+    """
+    Questions 8 & 10: Uses the weight generator to find diverse policies,
+    then filters them to keep only the Lorenz-efficient ones.
+    """
+    print(f"\n--- QUESTIONS 8 & 10: Diverse Weights & Lorenz Filtering ---")
+    weights_list = generate_weight_vectors(step)
+    
+    unique_policies = []
+    seen_policies = set() # To track duplicates
+    
+    # --- QUESTION 8: Generate Policies ---
+    for w in weights_list:
+        # Run Value Iteration for this specific weight vector
+        policy, _ = solve_weighted_sum(mdp, w)
+        
+        # Convert list to tuple so we can store it in a set
+        pol_tuple = tuple(policy)
+        
+        # If this is a new policy we haven't seen before, process it
+        if pol_tuple not in seen_policies:
+            seen_policies.add(pol_tuple)
+            
+            # Get normalized values (for Lorenz math) and raw values (for display)
+            V_norm = mdp.evaluate_policy(policy, use_normalized=True)[0]
+            V_raw = mdp.evaluate_policy(policy, use_normalized=False)[0]
+            
+            l_vec = get_lorenz_vector(V_norm)
+            
+            unique_policies.append({
+                'policy': policy,
+                'weight_example': w, # Just saving one weight vector that generated it
+                'v_norm': V_norm,
+                'v_raw': V_raw,
+                'l_vec': l_vec,
+                'lorenz_efficient': True # Assume true until checked
+            })
+            
+    print(f"Generated {len(weights_list)} weight combinations.")
+    print(f"Found {len(unique_policies)} unique policies.")
+    
+    # --- QUESTION 10: Lorenz Filtering ---
+    for i, p1 in enumerate(unique_policies):
+        L1 = p1['l_vec']
+        for j, p2 in enumerate(unique_policies):
+            if i == j: continue
+            L2 = p2['l_vec']
+            
+            # Lorenz Dominance check
+            if np.all(L2 >= L1) and np.any(L2 > L1):
+                p1['lorenz_efficient'] = False
+                break 
+                
+    # --- Display Results ---
+    print(f"\n{'Policy (Actions for States 1 to 10)':<35} | {'Profit (€)':<10} | {'Carbon':<8} | {'Bio':<8} | {'Lorenz Efficient'}")
+    print("-" * 90)
+    for p in unique_policies:
+        pol_str = str(p['policy'])
+        eff_str = "YES" if p['lorenz_efficient'] else "NO"
+        print(f"{pol_str:<35} | {p['v_raw'][0]:<10.2f} | {p['v_raw'][1]:<8.2f} | {p['v_raw'][2]:<8.2f} | {eff_str}")
+        
+    return unique_policies
