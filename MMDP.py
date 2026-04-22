@@ -33,20 +33,24 @@ class MMDP:
     
     def normalize_rewards(self):
         """
-        Rescales rewards for each criterion so that they lie in [0, 1].
-        The smallest reward for a type becomes 0, and the largest becomes 1.
+        Calculates the normalized rewards in [0, 1] and stores them in self.R_normalized,
+        preserving the original self.R values for final reporting.
         """
-        # Find min and max for each criterion across all states and actions
-        # axis=(0, 1) means we look across all S and A for each criterion l
+        # 1. Find min and max for each criterion across all states and actions
         r_min = self.R.min(axis=(0, 1))
         r_max = self.R.max(axis=(0, 1))
         
-        # Avoid division by zero if all rewards for a criterion are the same
+        # 2. Avoid division by zero if all rewards for a criterion are the same
         denom = r_max - r_min
         denom[denom == 0] = 1.0 
         
-        # Apply the formula: (R - min) / (max - min)
-        self.R = (self.R - r_min) / denom
+        # 3. Apply the formula and save to a NEW attribute, leaving self.R untouched
+        self.R_normalized = (self.R - r_min) / denom
+        
+        # Optional: You can also save the min and max values if you ever need 
+        # to "un-normalize" something later.
+        self.r_min = r_min
+        self.r_max = r_max
 
 # Example Usage for the Tree Plantation Case Study:
 # States: e.g., 0=Young, 1=Mature, 2=Old
