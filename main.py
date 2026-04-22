@@ -20,14 +20,32 @@ def main():
     forest_model.normalize_rewards()
     print("[OK] Forêt générée et modèle MMDP normalisé.\n")
 
-    # --- ÉTAPE 3 : Somme Pondérée (Question 4) ---
-    print("--- TEST QUESTION 4 : Somme Pondérée ---")
-    p_p, _ = solve_weighted_sum(forest_model, [1.0, 0.0, 0.0])
-    print(f"Profit Max : {p_p}")
-    p_b, _ = solve_weighted_sum(forest_model, [0.33, 0.33, 0.34])
-    print(f"Équilibrée : {p_b}")
-    p_e, _ = solve_weighted_sum(forest_model, [0.0, 0.5, 0.5])
-    print(f"Écologiste : {p_e}\n")
+    # --- ÉTAPE 3 : Évaluation de Politique (Question 4) ---
+    print("--- TEST QUESTION 4 : Évaluation de Politique ---")
+    
+    # Cas de test : "Récolte Systématique" (Action 1 partout)
+    # Dans ce cas, on peut vérifier le calcul à la main pour l'état 1 :
+    # V(1) = R(1, h) + gamma * V(1)  =>  V(1) = R(1, h) / (1 - gamma)
+    policy_always_harvest = [1] * 10
+    
+    # Évaluation avec les récompenses brutes (use_normalized=False)
+    v_eval = forest_model.evaluate_policy(policy_always_harvest, use_normalized=False)
+    
+    # 1. Calcul théorique "à la main" pour le Profit à l'état 1 (indice 0)
+    # R_r(1, h) = (1 - 0.9*pf) * mu * v1 * T1 - Cp
+    # R_r(1, h) = (1 - 0.9*0.02) * 0.9 * 14 * 7 - 1000 = -913.388
+    # V_théo = -913.388 / (1 - 0.9) = -9133.88
+    
+    print(f"Politique 'Récolte Toujours' (Actions) : {policy_always_harvest}")
+    print(f"Valeur attendue (Profit État 1) : ~ -9133.88")
+    print(f"Valeur calculée (Profit État 1) : {v_eval[0, 0]:.2f}")
+    print(v_eval)
+    
+    if abs(v_eval[0, 0] - (-9133.88)) < 1e-2:
+        print("[SUCCÈS] La vérification manuelle confirme la Question 4.\n")
+    else:
+        print("[ERREUR] Écart détecté dans le calcul de la Question 4.\n")
+
 
     # --- ÉTAPE 4 & 5 : Politiques à seuil (Questions 5 et 6) ---
     q5_data = question_5_threshold_policies(forest_model)

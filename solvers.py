@@ -53,8 +53,6 @@ def solve_weighted_sum(mmdp, weights, epsilon=1e-6):
             
     return policy.tolist(), V
 
-import numpy as np
-
 def question_5_threshold_policies(mdp):
     """
     Évalue les politiques à seuil pour tau dans {0..10} et identifie 
