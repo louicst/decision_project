@@ -1,6 +1,6 @@
 import numpy as np
 
-# --- QUESTION 2 : Instance de la Plantation d'Arbres ---
+# QUESTION 2
 def generate_forest_instance():
     """
     Génère les paramètres (S, A, T, R, gamma) pour le MMDP de la forêt.
