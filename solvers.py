@@ -47,19 +47,19 @@ def solve_weighted_sum(mmdp, weights, epsilon=1e-6):
 
 def question_5_threshold_policies(mdp):  
     """
-    Évalue les politiques à seuil pour tau dans {0..10} et identifie 
-    lesquelles sont optimales au sens de Pareto.
+    Donne les politiques à seuil pour tau dans {0..10} 
+    and we indentify lesquelles sont optimales au sens de Pareto
     """
-    print("\n--- QUESTION 5: Politiques à seuil & Frontière de Pareto ---") 
+    print("\n Question 5 : ") 
     
     policies_data = []
     
-    # 1. Générer et évaluer les politiques à seuil
+    # générer et évaluer les politiques à seuil
     for tau in range(11): 
         # Action HARVEST (1) si l'âge (s+1) > tau, sinon WAIT (0)
         policy = [1 if (s + 1) > tau else 0 for s in range(mdp.num_states)]
         
-        # On utilise les récompenses brutes (euros, etc.) pour l'affichage
+        # we use les récompenses brutes (euros, ...)
         V_pi = mdp.evaluate_policy(policy, use_normalized=False)
         
         # On regarde la valeur depuis l'état initial (jeunes pousses, s=0)
@@ -73,7 +73,7 @@ def question_5_threshold_policies(mdp):
             'bio': v_initial[2]
         })
 
-    # 2. Identifier les politiques efficaces au sens de Pareto
+    # les politiques efficaces au sens de Pareto
     pareto_efficient_taus = []
     
     for i, p1 in enumerate(policies_data):
@@ -85,7 +85,7 @@ def question_5_threshold_policies(mdp):
                 
             v2 = np.array([p2['profit'], p2['carbon'], p2['bio']])
             
-            # Dominance de Pareto : p2 est >= p1 partout ET strictement > quelque part
+            # Dominance de Pareto :
             if np.all(v2 >= v1) and np.any(v2 > v1):
                 is_efficient = False
                 break 
@@ -94,7 +94,6 @@ def question_5_threshold_policies(mdp):
         if is_efficient:
             pareto_efficient_taus.append(p1['tau'])
 
-    # 3. Affichage du tableau
     print(f"{'Tau':<5} | {'Profit (€)':<12} | {'Carbone':<10} | {'Biodiversité':<12} | {'Pareto Efficient'}")
     print("-" * 70)
     for p in policies_data:
@@ -105,19 +104,18 @@ def question_5_threshold_policies(mdp):
 
 
 def get_lorenz_vector(v):
-    """Calcule le vecteur de Lorenz (somme cumulée des valeurs triées)."""
+    """Calcule le vecteur de Lorenz"""
     return np.cumsum(np.sort(v))
 
 def question_6_lorenz_efficient_policies(mdp, policies_data_from_q5):
     """
-    Identifie quelles politiques à seuil sont efficaces au sens de Lorenz.
-    CRITIQUE : Doit utiliser les valeurs normalisées.
+    Identify quelles politiques à seuil sont efficaces au sens de Lorenz.
     """
-    print("\n--- QUESTION 6: Équité et Optimalité de Lorenz ---")
+    print("\n Question 6 :")
     
     lorenz_data = []
     
-    # 1. Ré-évaluer pour obtenir les valeurs NORMALISÉES
+    # pour obtenir les valeurs normalized
     for p in policies_data_from_q5:
         tau = p['tau']
         policy = p['policy']
@@ -134,7 +132,7 @@ def question_6_lorenz_efficient_policies(mdp, policies_data_from_q5):
             'lorenz_efficient': True 
         })
         
-    # 2. Vérifier la dominance de Lorenz
+    # check la dominance de Lorenz
     for i, p1 in enumerate(lorenz_data):
         L1 = p1['l_vec']
         for j, p2 in enumerate(lorenz_data):
@@ -145,7 +143,6 @@ def question_6_lorenz_efficient_policies(mdp, policies_data_from_q5):
                 p1['lorenz_efficient'] = False
                 break 
                 
-    # 3. Affichage
     print(f"{'Tau':<5} | {'Norm (Prof, Carb, Bio)':<30} | {'Vecteur de Lorenz':<30} | {'Lorenz Efficient'}")
     print("-" * 90)
     for p in lorenz_data:
@@ -158,11 +155,10 @@ def question_6_lorenz_efficient_policies(mdp, policies_data_from_q5):
 
 def generate_weight_vectors(step=0.1):
     """
-    Question 7: Generates a diverse set of weight vectors (w1, w2, w3) 
-    that sum to 1.0, using a specified step size.
+    Question 7 : génère a set of weight vectors (w1, w2, w3) 
+    avec la somme = 1.0
     """
     weights = []
-    # Use integers to avoid Python floating-point precision issues
     num_steps = int(np.round(1.0 / step))
     
     for w1 in range(num_steps + 1):
@@ -174,7 +170,7 @@ def generate_weight_vectors(step=0.1):
 
 def questions_8_to_10_diverse_lorenz_policies(mdp, step=0.1):
     """
-    Questions 8 & 10: Uses the weight generator to find diverse policies,
+    Questions 8 et 10 : Uses the weight generator to find diverse policies,
     then filters them to keep only the Lorenz-efficient ones.
     """
     print(f"\n--- QUESTIONS 8 & 10: Diverse Weights & Lorenz Filtering ---")
