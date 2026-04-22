@@ -30,6 +30,23 @@ class MMDP:
     def get_reward_vector(self, s, a):
         """Returns the l-dimensional reward vector for state s and action a."""
         return self.R[s, a]
+    
+    def normalize_rewards(self):
+        """
+        Rescales rewards for each criterion so that they lie in [0, 1].
+        The smallest reward for a type becomes 0, and the largest becomes 1.
+        """
+        # Find min and max for each criterion across all states and actions
+        # axis=(0, 1) means we look across all S and A for each criterion l
+        r_min = self.R.min(axis=(0, 1))
+        r_max = self.R.max(axis=(0, 1))
+        
+        # Avoid division by zero if all rewards for a criterion are the same
+        denom = r_max - r_min
+        denom[denom == 0] = 1.0 
+        
+        # Apply the formula: (R - min) / (max - min)
+        self.R = (self.R - r_min) / denom
 
 # Example Usage for the Tree Plantation Case Study:
 # States: e.g., 0=Young, 1=Mature, 2=Old
